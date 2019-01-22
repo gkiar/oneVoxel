@@ -6,13 +6,13 @@ from argparse import ArgumentParser
 import json
 
 
-def skull_strip(image, output, fourd=False, debug=False):
+def skull_strip(image, mask, fourd=False, debug=False):
     mode = "launch"
     descriptor = "zenodo.1482743"
     invocation = {
         "infile": image,
         "binary_mask_flag": True,
-        "maskfile": output,
+        "maskfile": mask,
         "verbose_flag": True,
         "debug_flag": True,
         "no_seg_output_flag": True,
@@ -20,7 +20,7 @@ def skull_strip(image, output, fourd=False, debug=False):
     }
 
     volumes = ["-v"]
-    for fl in [image, output]:
+    for fl in [image, mask]:
         volumes += ["{0}:{0}".format(op.abspath(op.dirname(fl)))]
 
     args = [mode, descriptor, json.dumps(invocation), *volumes]
@@ -73,6 +73,8 @@ def main():
     parser = ArgumentParser(__file__)
     parser.add_argument("image",
                         help="")
+    parser.add_argument("mask",
+                        help="")
     parser.add_argument("output",
                         help="")
     parser.add_argument("--debug", "-x", action="store_true")
@@ -89,14 +91,15 @@ def main():
         return 0
 
     image = results.image
+    mask = results.mask
     output = results.output
     debug = results.debug
     fourd = results.fourd
     intensity = results.intensity
     scale = results.scale
 
-    skull_strip(image, output, fourd=fourd, debug=debug)
-    one_voxel(image, mask, output, intensity, scale, debug=debug)
+    skull_strip(image, mask, fourd=fourd, debug=debug)
+    # one_voxel(image, mask, output, intensity, scale, debug=debug)
 
 
 if __name__ == "__main__":

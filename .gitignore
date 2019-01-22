@@ -1,3 +1,4 @@
+*.nii*
 *.swp
 .DS_Store
 

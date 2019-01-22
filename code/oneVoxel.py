@@ -24,7 +24,10 @@ def one_voxel_noise(image, mask, output, intensity=0.01, scale=True,
         index = np.random.randint(0, high=len(mask_locs[0]))
         location = tuple(ml[index] for ml in mask_locs)
 
+    if len(location) > 3:
+        location = location[0:3]
     print(location)
+
     if scale:
         image_data[location] = image_data[location]*(1 + intensity)
     else:
