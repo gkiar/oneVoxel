@@ -5,17 +5,18 @@ from argparse import ArgumentParser
 import nibabel as nib
 import numpy as np
 from scipy import ndimage
+from nilearn import image as nilimage
 
 
 def one_voxel_noise(image, mask, output, intensity=0.01, scale=True,
-                    location=None, erode=1, debug=False):
+                    location=None, erode=3, debug=False):
     image_loaded = nib.load(image)
     mask_loaded = nib.load(mask)
 
     image_data = image_loaded.get_data()
-    mask_data = mask_laoded.get_data()
+    mask_data = mask_loaded.get_data()
 
-    mask_data = ndimage.binary_erostion(mask_data, iterations=int(erode))
+    mask_data = ndimage.binary_erosion(mask_data, iterations=int(erode))
     mask_locs = np.where(mask_data > 0)
 
     if location:
@@ -26,7 +27,6 @@ def one_voxel_noise(image, mask, output, intensity=0.01, scale=True,
 
     if len(location) > 3:
         location = location[0:3]
-    print(location)
 
     if scale:
         image_data[location] = image_data[location]*(1 + intensity)
@@ -42,11 +42,16 @@ def one_voxel_noise(image, mask, output, intensity=0.01, scale=True,
         print(image_loaded.header_class)
         return -1
 
-    output_loaded = func(data=image_data,
+    output_loaded = func(image_data,
                          header=image_loaded.header,
                          affine=image_loaded.affine)
     nib.save(output_loaded, output)
 
+    # Add one to make it 1-indexed
+    location = tuple(l+1 for l in location)
+    real_location = nilimage.coord_transform(location[0], location[1],
+                                             location[2], image_loaded.affine)
+    print(location, real_location)
     return location
 
 
@@ -79,7 +84,7 @@ def main():
     parser.add_argument("--scale", "-s", action="store_true",
                         help="")
     parser.add_argument("--erode", "-e", action="store", type=int,
-                        default=1, help="")
+                        default=3, help="")
     parser.add_argument("--boutiques", action="store_true")
 
     results = parser.parse_args()
@@ -89,6 +94,7 @@ def main():
         return 0
 
     image = results.image
+    mask = results.mask
     output = results.output
     debug = results.debug
     intensity = results.intensity
