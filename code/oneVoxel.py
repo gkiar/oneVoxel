@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 from argparse import ArgumentParser
 import nibabel as nib
 import numpy as np
