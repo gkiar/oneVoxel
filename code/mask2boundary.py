@@ -10,13 +10,10 @@ def mask2boundary(mask, output, width=4):
     mask_loaded = nib.load(mask)
     mask_data = mask_loaded.get_data()
 
-    print('1')
     outer = ndimage.binary_dilation(mask_data,
                                     iterations=int(np.floor(width/2))).astype(int)
-    print('2')
     inner = ndimage.binary_erosion(mask_data,
                                    iterations=int(np.ceil(width/2))).astype(int)
-    print('3')
 
     mask_data = outer-inner
 
