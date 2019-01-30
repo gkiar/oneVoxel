@@ -32,6 +32,23 @@ def mask2boundary(mask, output, width=4):
     nib.save(output_loaded, output)
 
 
+def make_descriptor(parser, arguments=None):
+    import boutiques.creator as bc
+    import os.path as op
+    import json
+
+    desc = bc.CreateDescriptor(parser, execname=op.basename(__file__))
+    basename = op.splitext(__file__)[0]
+    desc.save(basename + ".json")
+
+    if arguments is not None:
+        invo = desc.createInvocation(arguments)
+        invo.pop("boutiques")
+
+        with open(basename + "_inputs.json", "w") as fhandle:
+            fhandle.write(json.dumps(invo, indent=4))
+
+
 def main():
     parser = ArgumentParser(__name__)
     parser.add_argument("mask",
@@ -42,8 +59,15 @@ def main():
     parser.add_argument("--width", "-w", action="store", type=int,
                         default=4,
                         help="Width of the boundary to be stored.")
+    parser.add_argument("--boutiques", action="store_true",
+                        help="Toggles creation of a Boutiques descriptor and "
+                             "invocation from the tool and inputs.")
 
     results = parser.parse_args()
+
+    if results.boutiques:
+        make_descriptor(parser, results)
+        return 0
 
     mask2boundary(results.mask, results.output, width=results.width)
 
