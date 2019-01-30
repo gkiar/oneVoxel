@@ -97,7 +97,7 @@ def main():
                         default=1.01,
                         help="The intensity of the noise to be injected in the "
                              "image. Default value is 1.01 so specifying the "
-                             "scale flag alone will result in a 1% intensity "
+                             "scale flag alone will result in a 1%% intensity "
                              "change at the target location.")
     parser.add_argument("--erode", "-e", action="store", type=int,
                         default=3,
