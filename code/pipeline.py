@@ -98,8 +98,9 @@ def main():
     intensity = results.intensity
     scale = results.scale
 
-    skull_strip(image, mask, fourd=fourd, debug=debug)
-    # one_voxel(image, mask, output, intensity, scale, debug=debug)
+    if not op.isfile(mask):
+        skull_strip(image, mask, fourd=fourd, debug=debug)
+    one_voxel(image, mask, output, intensity, scale, debug=debug)
 
 
 if __name__ == "__main__":
