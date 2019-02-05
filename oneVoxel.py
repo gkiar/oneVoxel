@@ -3,7 +3,9 @@
 from argparse import ArgumentParser
 import nibabel as nib
 import numpy as np
+from itertools import product
 from scipy import ndimage
+from copy import deepcopy
 
 
 def one_voxel_noise(image, mask, scale=True, intensity=0.01, erode=3,
@@ -58,7 +60,13 @@ def one_voxel_noise(image, mask, scale=True, intensity=0.01, erode=3,
     location : tuple of ints or list of tuples of ints
         Location(s) of injected noise within the image.
     """
-    mask = ndimage.binary_erosion(mask, iterations=int(erode))
+    # Create new container for image data
+    image = deepcopy(image)
+
+    # Adding special case to erosion: when 0, don't erode.
+    erode = int(erode)
+    if erode:
+        mask = ndimage.binary_erosion(mask, iterations=erode)
     mask_locs = np.where(mask > 0)
     mask_locs = list(zip(*mask_locs))
 
@@ -74,6 +82,10 @@ def one_voxel_noise(image, mask, scale=True, intensity=0.01, erode=3,
     # Verify mask is valid
     if len(mask.shape) > len(image.shape):
         raise ValueError("Mask can't have more dimensions than image.")
+    if mask.shape != image.shape[0:len(mask.shape)]:
+        raise ValueError("Mask must have same range for shared dimensions.")
+    if not len(mask_locs):
+        raise ValueError("Mask contains no locations - try eroding less.")
 
     # If a location is provided do some basic sanity checks
     if location:
@@ -125,9 +137,14 @@ def one_voxel_noise(image, mask, scale=True, intensity=0.01, erode=3,
 
     # If independent, generate a location for each volume in all dimensions
     else:
-        #TODO: work as advertised.
-        loc = location_getter()
-        image[loc] = noise_injector(image[loc])
+        # In this case only, the location will be a list of positions
+        loc = []
+        extra_range = image.shape[len(location_getter()):]
+        extra_range = [list(np.arange(er)) for er in extra_range]
+        extra_locs = product(*extra_range)
+        for extra_loc in extra_locs:
+            loc += [location_getter() + extra_loc]
+            image[loc[-1]] = noise_injector(image[loc[-1]])
 
     return (image, loc)
 
@@ -242,8 +259,8 @@ def main():
     nib.save(output_loaded, output)
 
     # Add one to make it 1-indexed for the user
-    location = tuple(l+1 for l in location)
-    print("Noise added at: {0}".format(location))
+    loc = tuple(l+1 for l in loc)
+    print("Noise added at: {0}".format(loc))
 
 
 if __name__ == "__main__":
