@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 import nibabel as nib
+from nilearn import image as nilimage
 import numpy as np
 from itertools import product
 from scipy import ndimage
@@ -188,7 +189,7 @@ def main():
                              "set, the intensity value will be multiplied by "
                              "the original image value at the target location.")
     parser.add_argument("--intensity", "-i", action="store", type=float,
-                        default=1.01,
+                        default=0.01,
                         help="The intensity of the noise to be injected in the "
                              "image. Default value is 1.01 so specifying the "
                              "scale flag alone will result in a 1%% intensity "
@@ -223,9 +224,9 @@ def main():
         return 0
 
     # Grab arguments from parser
-    image = results.image
-    mask = results.mask
-    output = results.output
+    image = results.image_file
+    mask = results.mask_file
+    output = results.output_file
     scale = results.scale
     intensity = results.intensity
     erode = results.erode
@@ -259,8 +260,13 @@ def main():
     nib.save(output_loaded, output)
 
     # Add one to make it 1-indexed for the user
-    loc = tuple(l+1 for l in loc)
-    print("Noise added at: {0}".format(loc))
+    mm_loc = nilimage.coord_transform(loc[0],
+                                      loc[1],
+                                      loc[2],
+                                      image_loaded.affine)
+    mm_loc += tuple(l+1 for l in loc[3:])
+    print("Noise added in matrix coordinates at: {0}".format(loc))
+    print("Noise added in mm coordinates at: {0}".format(mm_loc))
 
 
 if __name__ == "__main__":
