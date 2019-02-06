@@ -1,0 +1,11 @@
+{
+    "image_file": "/data/RocklandSample/derivatives/derivatives_mini/sub-A00008326/ses-DS2/dwi/sub-A00008326_ses-DS2_dwi_eddy.nii.gz",
+    "mask_file": "/data/RocklandSample/derivatives/derivatives_mini/sub-A00008326/ses-DS2/dwi/sub-A00008326_ses-DS2_T1w_fast_seg_2.nii.gz",
+    "output_directory": "/data/RocklandSample/derivatives/derivatives_mini/sub-A00008326/ses-DS2_1vox/",
+    "scale": true,
+    "intensity": 0.01,
+    "erode": 2,
+    "force": false,
+    "mode": "single",
+    "verbose": true
+}
