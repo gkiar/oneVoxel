@@ -14,7 +14,7 @@
             "id": "image_file",
             "name": "image_file",
             "optional": false,
-            "type": "String",
+            "type": "File",
             "value-key": "[IMAGE_FILE]"
         },
         {
@@ -22,7 +22,7 @@
             "id": "mask_file",
             "name": "mask_file",
             "optional": false,
-            "type": "String",
+            "type": "File",
             "value-key": "[MASK_FILE]"
         },
         {
@@ -116,6 +116,26 @@
         }
     ],
     "name": "oneVoxel",
+    "output-files": [
+        {
+            "id": "noisy_image",
+            "name": "Noisy Image",
+            "path-template": "[OUTPUT_DIRECTORY]*_1vox-*.nii.gz",
+            "path-template-stripped-extensions": [
+                ".nii.gz", ".nii"
+            ],
+            "optional": true
+        },
+        {
+            "id": "noise_summary",
+            "name": "Noise Summary",
+            "path-template": "[OUTPUT_DIRECTORY]*_1vox-*.json",
+            "path-template-stripped-extensions": [
+                ".nii.gz", ".nii"
+            ],
+            "optional": true
+        }
+    ],
     "schema-version": "0.5",
     "suggested-resources": {
         "cpu-cores": 1,
