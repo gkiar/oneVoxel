@@ -1,0 +1,7 @@
+{
+    "clean": true,
+    "image_file": "./sandbox/sub-A00008326_ses-DS2_dwi_eddy.nii.gz",
+    "apply_noise": "./sandbox/sub-A00008326_ses-DS2_dwi_eddy_1vox-8124b556.json",
+    "output_directory": "./sandbox/",
+    "verbose": true
+}

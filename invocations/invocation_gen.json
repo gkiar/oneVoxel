@@ -1,0 +1,8 @@
+{
+    "clean": true,
+    "image_file": "./sandbox/sub-A00008326_ses-DS2_dwi_eddy.nii.gz",
+    "mask_file": "./sandbox/sub-A00008326_ses-DS2_T1w_fast_seg_2.nii.gz",
+    "output_directory": "./sandbox/",
+    "mode": "independent",
+    "verbose": true
+}

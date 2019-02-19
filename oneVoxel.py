@@ -294,6 +294,7 @@ def main():
         scale = noise_data['scale']
         intensity = noise_data['intensity']
         loc = [tuple(vl) for vl in noise_data["voxel_location"]]
+        mm_loc = noise_data["mm_location"]
         original_hash = noise_data['matrix_hash']
 
     # If not, generate noise based on parameters from the command-line
@@ -324,11 +325,6 @@ def main():
     if original_hash and output_hash != original_hash:
         print("WARNING: Noisy image hash is different from expected hash.")
 
-    if verb:
-        print("Noise added in matrix coordinates at: {0}".format(loc))
-        print("Noise added in mm coordinates at: {0}".format(mm_loc))
-        print("Image stored in: {0}".format(output_file))
-
     # Only create noise JSON if there wasn't one provided
     if not apply_noise:
         # Get noise locations in mm (useful for visualizing)
@@ -347,6 +343,11 @@ def main():
                          "scale": scale,
                          "intensity": intensity}
             fhandle.write(json.dumps(noisedict, indent=4, sort_keys=True))
+
+    if verb:
+        print("Noise added in matrix coordinates at: {0}".format(loc))
+        print("Noise added in mm coordinates at: {0}".format(mm_loc))
+        print("Image stored in: {0}".format(output_file))
 
     # If we're being clean, return before saving an image.
     if clean:
