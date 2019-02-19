@@ -1,3 +1,4 @@
+sandbox/
 *.nii*
 *.swp
 .DS_Store
