@@ -2,12 +2,13 @@ import sys
 from setuptools import setup
 import sys
 
-VERSION = "0.2.0"
+VERSION = "0.3.0pre0"
 DEPS = [
         "numpy",
         "scipy",
         "nibabel",
-        "nilearn"
+        "nilearn",
+        "scikit-learn"
        ]
 
 setup(name="onevox",
@@ -33,7 +34,7 @@ setup(name="onevox",
                 "Natural Language :: English"
                   ],
       license="MIT",
-      packages=["onevoxel"],
+      packages=["onevox"],
       include_package_data=True,
       test_suite="pytest",
       tests_require=["pytest"],
@@ -41,7 +42,7 @@ setup(name="onevox",
       install_requires=DEPS,
       entry_points=  {
         "console_scripts": [
-            "onevox=onevoxel.driver:main",
+            "onevox=onevox.cli:main",
         ]
       },
       zip_safe=False)

@@ -10,16 +10,17 @@ from nilearn import image as nilimage
 import nibabel as nib
 
 from .noise import generate_noise_params, apply_noise_params
+from .io import image_writer
 
 
 def make_descriptor(parser, arguments=None):
     import boutiques.creator as bc
 
-    desc = bc.CreateDescriptor(parser, execname=op.basename(__file__),
+    desc = bc.CreateDescriptor(parser, execname=op.basename("onevox"),
                                tags={"domain": ["neuroinformatics",
                                                 "image processing",
                                                 "mri", "noise"]})
-    basename = op.splitext(__file__)[0]
+    basename = "onevox"
     desc.save(basename + ".json")
 
     if arguments is not None:
@@ -30,8 +31,91 @@ def make_descriptor(parser, arguments=None):
             fhandle.write(json.dumps(invo, indent=4))
 
 
+def driver(image_file, output_directory, mask_file=None, erode=3, clean=False,
+           mode='single', apply_noise=None, no_scale=False, intensity=0.01,
+           location=[], force=False, verbose=False, **kwargs):
+    scale = not no_scale
+    if apply_noise:
+        output_file = op.splitext(apply_noise)[0]
+        # Handle special case: apply_noise and clean means delete noisy image.
+        if clean:
+            # TODO: generalize to other output image formats
+            if op.isfile(output_file + ".nii.gz"):
+                os.remove(output_file + ".nii.gz")
+            return 0
+    else:
+        # Create output filename for noise data
+        bname = op.basename(image_file).split(".")[0]
+        modifier = "_1vox-" + str(uuid.uuid1())[0:8]
+        output_file = op.join(output_directory, bname + modifier)
+
+    # Load nifti images and extract their data
+    image_loaded = nib.load(image_file)
+    image_data = image_loaded.get_data()
+
+    # If a noise file is provided, use it to grab noise features
+    if apply_noise:
+        with open(apply_noise) as fhandle:
+            noise_data = json.loads(fhandle.read())
+
+        scale = noise_data['scale']
+        intensity = noise_data['intensity']
+        loc = [tuple(vl) for vl in noise_data["voxel_location"]]
+        mm_loc = noise_data["mm_location"]
+        original_hash = noise_data['matrix_hash']
+
+    # If not, generate noise based on parameters from the command-line
+    else:
+        original_hash = None
+
+        if not mask_file:
+            raise ValueError("Must provide a mask for generating noise.")
+        mask_loaded = nib.load(mask_file)
+        mask_data = mask_loaded.get_data()
+
+        # Generate noise based on input params
+        loc = generate_noise_params(image_data, mask=mask_data, erode=erode,
+                                    location=location, force=force)
+
+    # Apply noise to image
+    output_data, output_hash = apply_noise_params(image_data, loc, scale=scale,
+                                                  intensity=intensity)
+
+    # Verify that the hashes match for our noisy images.
+    if original_hash and output_hash != original_hash:
+        print("WARNING: Noisy image hash is different from expected hash.")
+
+    # Only create noise JSON if there wasn't one provided
+    if not apply_noise:
+        # Get noise locations in mm (useful for visualizing)
+        mm_loc = []
+        for l in loc:
+            tmp_mm = nilimage.coord_transform(l[0], l[1], l[2],
+                                              image_loaded.affine)
+            mm_loc += [tuple(float(tmm) for tmm in tmp_mm)]
+
+        # Save noise information to a JSON file
+        with open(output_file + ".json", 'w') as fhandle:
+            noisedict = {"voxel_location": loc,
+                         "mm_location": mm_loc,
+                         "base_image": image_file,
+                         "matrix_hash": output_hash,
+                         "scale": scale,
+                         "intensity": intensity}
+            fhandle.write(json.dumps(noisedict, indent=4, sort_keys=True))
+
+    if verbose:
+        print("Noise added in matrix coordinates at: {0}".format(loc))
+        print("Noise added in mm coordinates at: {0}".format(mm_loc))
+        print("Image stored in: {0}".format(output_file))
+
+    # If we're being clean, return without saving an image.
+    if not clean:
+        image_writer(output_file + ".nii.gz", image_loaded, output_data)
+
+
 def main(args=None):
-    parser = ArgumentParser(__file__,
+    parser = ArgumentParser("onevox",
                             description="Adds noise to a single voxel within an"
                                         " image, conditioned by an image mask.")
     parser.add_argument("image_file",
@@ -109,112 +193,16 @@ def main(args=None):
         make_descriptor(parser, results)
         return 0
 
-    # Grab arguments from parser
-    image = results.image_file
-    output = results.output_directory
-    clean = results.clean
-    apply_noise = results.apply_noise
-    verb = results.verbose
+    # Run the full pipeline which handles all the arguments
+    image_file = results.image_file
+    output_dir = results.output_directory
 
-    if apply_noise:
-        output_file = op.splitext(apply_noise)[0]
-        # Handle special case: apply_noise and clean means delete noisy image.
-        if clean:
-            if op.isfile(output_file + ".nii.gz"):
-                os.remove(output_file + ".nii.gz")
-            return 0
-    else:
-        # Create output filename for noise data
-        bname = op.basename(image).split(".")[0]
-        modifier = "_1vox-" + str(uuid.uuid1())[0:8]
-        output_file = op.join(output, bname + modifier)
+    argdict = vars(results)
+    del argdict["boutiques"]
+    del argdict["image_file"]
+    del argdict["output_directory"]
 
-    # Load nifti images and extract their data
-    image_loaded = nib.load(image)
-    image_data = image_loaded.get_data()
-
-    # If a noise file is provided, use it to grab noise features
-    if apply_noise:
-        with open(apply_noise) as fhandle:
-            noise_data = json.loads(fhandle.read())
-
-        scale = noise_data['scale']
-        intensity = noise_data['intensity']
-        loc = [tuple(vl) for vl in noise_data["voxel_location"]]
-        mm_loc = noise_data["mm_location"]
-        original_hash = noise_data['matrix_hash']
-
-    # If not, generate noise based on parameters from the command-line
-    else:
-        scale = not results.no_scale
-        intensity = results.intensity
-        location = results.location
-        force = results.force
-        mode = results.mode
-        mask = results.mask_file
-        erode = results.erode
-        original_hash = None
-
-        if not mask:
-            raise ValueError("Must provide a mask for generating noise.")
-        mask_loaded = nib.load(mask)
-        mask_data = mask_loaded.get_data()
-
-        # Generate noise based on input params
-        loc = generate_noise_params(image_data, mask=mask_data, erode=erode,
-                                    location=location, force=force)
-
-    # Apply noise to image
-    output_data, output_hash = apply_noise_params(image_data, loc, scale=scale,
-                                                  intensity=intensity)
-
-    # Verify that the hashes match for our noisy images.
-    if original_hash and output_hash != original_hash:
-        print("WARNING: Noisy image hash is different from expected hash.")
-
-    # Only create noise JSON if there wasn't one provided
-    if not apply_noise:
-        # Get noise locations in mm (useful for visualizing)
-        mm_loc = []
-        for l in loc:
-            tmp_mm = nilimage.coord_transform(l[0], l[1], l[2],
-                                              image_loaded.affine)
-            mm_loc += [tuple(float(tmm) for tmm in tmp_mm)]
-
-        # Save noise information to a JSON file
-        with open(output_file + ".json", 'w') as fhandle:
-            noisedict = {"voxel_location": loc,
-                         "mm_location": mm_loc,
-                         "base_image": image,
-                         "matrix_hash": output_hash,
-                         "scale": scale,
-                         "intensity": intensity}
-            fhandle.write(json.dumps(noisedict, indent=4, sort_keys=True))
-
-    if verb:
-        print("Noise added in matrix coordinates at: {0}".format(loc))
-        print("Noise added in mm coordinates at: {0}".format(mm_loc))
-        print("Image stored in: {0}".format(output_file))
-
-    # If we're being clean, return before saving an image.
-    if clean:
-        return 0
-
-    # If we're not cleaning, save noisy image in the same format as the original
-    if image_loaded.header_class == nib.Nifti1Header:
-        imtype = nib.Nifti1Image
-    elif image_loaded.header_class == nib.Nifti2Header:
-        imtype = nib.Nifti2Image
-    else:
-        raise TypeError("Unrecognized header - only Nifti is supported.")
-
-    # Create and save the output Nifti
-    output_loaded = imtype(output_data,
-                           header=image_loaded.header,
-                           affine=image_loaded.affine)
-
-    # Save image to a Nifti file
-    nib.save(output_loaded, output_file + ".nii.gz")
+    driver(image_file, output_dir, **vars(results))
 
 
 if __name__ == "__main__":
