@@ -9,8 +9,6 @@ RUN pip3 install --upgrade pip &&\
     pip3 install numpy>=1.9.0
 RUN pip3 install scipy==1.2.0 nibabel nilearn scikit-learn boutiques
 
-RUN mkdir -p /opt
-COPY ./oneVoxel.py /opt/oneVoxel.py
-
-ENTRYPOINT ["python3", "/opt/oneVoxel.py"]
+RUN pip3 install onevox==0.3.0rc0
+ENTRYPOINT ["onevox"]
 
