@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import nibabel as nib
-import json
 
 
 def image_writer(filename, input_image, output_data):

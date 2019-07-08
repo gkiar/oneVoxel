@@ -18,6 +18,11 @@ Simple! Just open your favourite terminal and type:
 Alongside installing the oneVoxel package, this will also ensure the
 dependencies are installed: ``numpy``, ``scipy``, ``nibabel``, and ``nilearn``.
 
+For building this in Docker, you can run the following command:
+
+::
+
+    $ docker build -t gkiar/onevox:local --network host .
 
 
 Usage

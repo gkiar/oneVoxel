@@ -1,8 +1,6 @@
-import sys
 from setuptools import setup
-import sys
 
-VERSION = "0.3.0pre0"
+VERSION = "0.3.0pre2"
 DEPS = [
         "numpy",
         "scipy",
@@ -40,7 +38,7 @@ setup(name="onevox",
       tests_require=["pytest"],
       setup_requires=DEPS,
       install_requires=DEPS,
-      entry_points=  {
+      entry_points={
         "console_scripts": [
             "onevox=onevox.cli:main",
         ]

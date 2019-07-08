@@ -32,7 +32,7 @@ def skull_strip(image, mask, fourd=False, debug=False):
 
 def one_voxel(image, mask, output, intensity=1.01, scale=True, location=None,
               debug=False):
-    mode="launch"
+    mode = "launch"
     descriptor = "zenodo.123456"
     invocation = {
         "image": image,
@@ -54,7 +54,7 @@ def one_voxel(image, mask, output, intensity=1.01, scale=True, location=None,
     bosh.execute(*args)
 
 
-def make_descriptor():
+def make_descriptor(parser, arguments):
     import boutiques.creator as bc
     import os.path as op
     import json
