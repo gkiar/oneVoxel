@@ -1,13 +1,13 @@
 {
     "author": "Greg Kiar <gkiar.github.io>",
-    "command-line": "python3 /opt/oneVoxel.py [IMAGE_FILE] [OUTPUT_DIRECTORY] [MASK_FILE] [NO_SCALE] [INTENSITY] [ERODE] [REPEAT] [LOCATION] [FORCE] [MODE] [CLEAN] [APPLY_NOISE] [VERBOSE] [BOUTIQUES]",
+    "command-line": "onevox [IMAGE_FILE] [OUTPUT_DIRECTORY] [MASK_FILE] [NO_SCALE] [INTENSITY] [ERODE] [REPEAT] [LOCATION] [FORCE] [MODE] [CLEAN] [APPLY_NOISE] [VERBOSE] [BOUTIQUES]",
     "container-image": {
         "image": "gkiar/onevoxel:v0.3.0rc3",
         "index": "index.docker.io",
         "type": "docker"
     },
     "description": "Adds 1-voxel noise to a Nifti image at either a provided or random location within a mask.",
-    "doi": "10.5281/zenodo.3306611",
+    "doi": "zenodo.3308620",
     "groups": [
         {
             "id": "noise_position_group",
