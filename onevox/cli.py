@@ -76,7 +76,7 @@ def driver(image_file, output_directory, mask_file=None, erode=3, clean=False,
 
         # Generate noise based on input params
         loc = generate_noise_params(image_data, mask=mask_data, erode=erode,
-                                    location=location, force=force)
+                                    location=location, force=force, mode=mode)
 
     # Apply noise to image
     output_data, output_hash = apply_noise_params(image_data, loc, scale=scale,

@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "0.3.0pre2"
+VERSION = "0.3.0pre3"
 DEPS = [
         "numpy",
         "scipy",

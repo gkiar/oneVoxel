@@ -9,5 +9,5 @@ RUN pip3 install --upgrade pip &&\
 RUN pip3 install scipy==1.2.0 cython
 RUN pip3 install nibabel nilearn scikit-learn boutiques
 
-RUN pip3 install onevox==0.3.0rc0
+RUN pip3 install onevox==0.3.0rc3
 ENTRYPOINT ["onevox"]
