@@ -4,5 +4,6 @@
     "mask_file": "./sandbox/sub-A00008326_ses-DS2_T1w_fast_seg_2.nii.gz",
     "output_directory": "./sandbox/",
     "mode": "independent",
+    "repeat": 3,
     "verbose": true
 }

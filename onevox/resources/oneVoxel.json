@@ -1,13 +1,13 @@
 {
     "author": "Greg Kiar <gkiar.github.io>",
-    "command-line": "python3 /opt/oneVoxel.py [IMAGE_FILE] [OUTPUT_DIRECTORY] [MASK_FILE] [NO_SCALE] [INTENSITY] [ERODE] [LOCATION] [FORCE] [MODE] [CLEAN] [APPLY_NOISE] [VERBOSE] [BOUTIQUES]",
+    "command-line": "python3 /opt/oneVoxel.py [IMAGE_FILE] [OUTPUT_DIRECTORY] [MASK_FILE] [NO_SCALE] [INTENSITY] [ERODE] [REPEAT] [LOCATION] [FORCE] [MODE] [CLEAN] [APPLY_NOISE] [VERBOSE] [BOUTIQUES]",
     "container-image": {
-        "image": "gkiar/onevoxel:v0.2.0",
+        "image": "gkiar/onevoxel:v0.3.0rc3",
         "index": "index.docker.io",
         "type": "docker"
     },
     "description": "Adds 1-voxel noise to a Nifti image at either a provided or random location within a mask.",
-    "doi": "10.5281/zenodo.2573287",
+    "doi": "10.5281/zenodo.3306611",
     "groups": [
         {
             "id": "noise_position_group",
@@ -76,6 +76,18 @@
             "optional": true,
             "type": "Number",
             "value-key": "[ERODE]"
+        },
+        {
+            "command-line-flag": "--repeat",
+            "default-value": 1,
+            "description": "Value dictating how many times to generate noise in the target image. This cannot be used with the 'location' parameter.",
+            "id": "repeat",
+            "integer": true,
+            "minimum": 0,
+            "name": "repeat",
+            "optional": true,
+            "type": "Number",
+            "value-key": "[REPEAT]"
         },
         {
             "command-line-flag": "--location",
@@ -186,5 +198,5 @@
             "noise"
         ]
     },
-    "tool-version": "v0.1.0"
+    "tool-version": "v0.3.0rc3"
 }
